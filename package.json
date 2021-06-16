@@ -1,0 +1,23 @@
+{
+  "name": "your-story",
+  "version": "1.0.0",
+  "description": "initial commit",
+  "main": "your-story.js",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node your-story.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AshleyBilbrey/your-story.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AshleyBilbrey/your-story/issues"
+  },
+  "homepage": "https://github.com/AshleyBilbrey/your-story#readme"
+}
