@@ -10,6 +10,17 @@ var mongo = require('mongodb');
 var session = require('express-session');
 var crypto = require("crypto");
 
+app.use(session({
+    secret: 'Implement dotenv',
+    resave: false,
+    saveUninitialized: true,
+    credentials: 'include',
+    cookie: { 
+        secure: false,
+        maxAge: 1000 * 60 * 60 * 24 * 7
+    }
+}));
+
 var MongoClient = require('mongodb').MongoClient;
 var mongourl = "mongodb://localhost:27017/your-story";
 
@@ -19,14 +30,18 @@ app.use(express.json())
 const { body, validationResult } = require('express-validator');
 
 app.get('/', (req, res) => {
+    console.log(req.sessionID);
+    console.log(req.session.email);
     res.render("splash.ejs");
 })
 
 app.get('/login', (req, res) => {
+    console.log(req.sessionID)
     res.render("login.ejs");
 })
 
 app.post('/login', body('email').isEmail(), (req, res) => {
+    console.log(req.sessionID)
     const errors = validationResult(req);
     if(!errors.isEmpty()) {
         return res.render("loginfail.ejs")
@@ -38,12 +53,58 @@ app.post('/login', body('email').isEmail(), (req, res) => {
     });
 })
 
+app.get('/session', (req, res) => {
+    if(req.query.token) {
+        MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
+            if(err) throw err;
+            var dbo = db.db("your-story");
+            dbo.collection("users").findOne({ loginlink: req.query.token }, (err, result) => {
+                if (err) throw err;
+                if(result) {
+                    let d = new Date;
+                    if(result.linkexpiry > d.getTime()) {
+                        req.session.email = result.email;
+                        console.log(req.sessionID);
+                        console.log(req.session.email);
+                        res.redirect("/story");
+                    } else {
+                        res.render("sessionissue.ejs")
+                    }
+                } else {
+                    res.render("sessionissue.ejs")
+                }
+            });
+        });
+    } else {
+        res.render("sessionissue.ejs");
+    }
+})
+
+app.get('/story', requiresLogin, (req, res, next) => {
+    res.render("story.ejs", {
+        email: req.session.email
+    });
+})
+
+app.get("/logout", (req, res) => {
+    req.session.email = null;
+    res.redirect("/");
+})
+
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
 })
 
+function requiresLogin(req, res, next) {
+    if(!req.session.email) {
+        res.redirect("/login");
+    } else {
+        next()
+    }
+}
+
 function newLogin(email) {
-    MongoClient.connect(mongourl, (err, db) => {
+    MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
         if(err) throw err;
         var dbo = db.db("your-story");
         dbo.collection("users").findOne({email: email.toLowerCase()}, (err, result) => {
@@ -57,7 +118,8 @@ function newLogin(email) {
                 dbo.collection("users").updateOne({email: email.toLowerCase()}, {
                     $set: {
                         linkexpiry: expirytime,
-                        loginlink: string
+                        loginlink: string,
+                        used: false
                     }
                 })
             } else {
@@ -65,7 +127,8 @@ function newLogin(email) {
                 let toInsert = {
                     email: email.toLowerCase(),
                     linkexpiry: expirytime,
-                    loginlink: string
+                    loginlink: string,
+                    used: false
                 }
                 dbo.collection("users").insertOne(toInsert);
             }
