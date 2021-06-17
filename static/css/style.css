@@ -1,3 +1,46 @@
-p {
+* {	
+    vertical-align: baseline;
+	border: 0 none;
+	outline: 0;
+	padding: 0;
+	margin: 0;
+}
+
+
+body {
     font-family: 'Montserrat', sans-serif;
+    height: 100vh;
+    width: 100vw;
+}
+
+.centerbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+}
+
+#splashbox {
+    justify-self: center;
+    align-self: center;
+    text-align: center;
+    line-height: 3;
+}
+
+.context-button {
+    width: 30%;
+    border-radius: 10px;
+    background-color: aqua;
+    margin: auto;
+}
+
+.context-button:hover {
+    opacity: .3;
+}
+
+a {
+    text-decoration: none;
+    color: black;
 }
