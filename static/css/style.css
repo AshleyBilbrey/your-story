@@ -48,3 +48,8 @@ a {
 input {
     background-color: pink;
 }
+
+#textpost {
+    width: 70%;
+    text-align: center;
+}

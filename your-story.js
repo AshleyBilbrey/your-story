@@ -10,6 +10,9 @@ var mongo = require('mongodb');
 var session = require('express-session');
 var crypto = require("crypto");
 
+let flagfiles = ["agender", "aromantic", "asexual", "bisexual", "genderfluid", "genderqueer", "intersex", "lesbian", "lgbt", "non-binary", "pansexual", "polysexual", "progressive-pride", "transgender"];
+let flagnames = ["Agender", "Aromantic", "Asexual", "Bisexual", "Genderfluid", "Genderqueer", "Intersex", "Lesbian", "LGBTQ+", "Non-binary", "Pansexual", "Polysexual", "Progressive Pride", "Transgender"];
+
 app.use(session({
     secret: 'Implement dotenv',
     resave: false,
@@ -99,29 +102,54 @@ app.get("/post", requiresLogin, (req, res, next) => {
 
 app.post("/post", requiresLogin, (req, res, next) => {
     if(req.body.title && req.body.content) {
-        MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
-            if(err) throw err;
-            var dbo = db.db("your-story");
-            let result = dbo.collection("posts").find().sort({ postnum: -1 }).limit(1).toArray((err, result) => {
-                let newpostnum;
-                console.log(result[0]);
-                if(result[0]) {
-                    newpostnum = result[0].postnum + 1;
-                } else {
-                    newpostnum = 1;
-                }
-                dbo.collection("posts").insertOne({
-                    title: req.body.title,
-                    content: req.body.content,
-                    postnum: newpostnum,
-                    poster: req.session.userid
-                })
-                res.redirect("/post/" + newpostnum)
-            });
-        })
+        if(req.body.title.length > 0 && req.body.content.length > 0) {
+            MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
+                if(err) throw err;
+                var dbo = db.db("your-story");
+                dbo.collection("posts").find().sort({ postnum: -1 }).limit(1).toArray((err, result) => {
+                    let newpostnum;
+                    console.log(result[0]);
+                    if(result[0]) {
+                        newpostnum = result[0].postnum + 1;
+                    } else {
+                        newpostnum = 1;
+                    }
+                    dbo.collection("posts").insertOne({
+                        title: req.body.title,
+                        content: req.body.content,
+                        postnum: newpostnum,
+                        poster: req.session.userid
+                    }).then(() => {
+                        res.redirect("/post/" + newpostnum)
+                    })
+                });
+            })
+        } else {
+            res.render("generror.ejs");
+        }
     } else {
         res.render("generror.ejs");
     }
+})
+
+app.get("/post/:postnum", requiresLogin, (req, res, next) => {
+    MongoClient.connect(mongourl, { useUnifiedTopology: true}, (err, db) => {
+        if(err) throw err;
+        var dbo = db.db("your-story");
+        console.log(req.params.postnum);
+        dbo.collection("posts").findOne({ "postnum": parseInt(req.params.postnum) }, (err, result) => {
+            console.log(result);
+            if(err) throw err;
+            if(result) {
+                res.render("textpost.ejs", {
+                    title: result.title,
+                    content: result.content
+                })
+            } else {
+                res.render("generror.ejs")
+            }
+        })
+    })
 })
 
 app.listen(port, () => {
@@ -140,7 +168,7 @@ function newLogin(email) {
     MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
         if(err) throw err;
         var dbo = db.db("your-story");
-        dbo.collection("users").findOne({email: email.toLowerCase()}, (err, result) => {
+        dbo.collection("users").findOne({ "email": email.toLowerCase() }, (err, result) => {
             if (err) throw err
             let expiry = new Date;
             let expirytime = expiry.getTime() + (1000 * 60 * 15); // 15 Minutes
