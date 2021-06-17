@@ -187,7 +187,12 @@ async function mailLink(token, email) {
         from: '"Your Story" <your-story@yourstory-pride.com',
         to: email,
         subject: "Your Story Login Link",
-        html: "Hello friend! Here is your login link for Your Story!<br><br><a href='http://localhost:3001/session?token=" + token + "'>http://localhost:3001/session?token=" + token + "</a><br><br>This link will expire in 15 minutes. If you did not request this link, no worries, just ignore this email."
+        html: "Hello friend! Here is the login link for Your Story! \
+               <br><br><a href='http://localhost:3001/session?token=" 
+               + token + "'>http://localhost:3001/session?token=" + 
+               token + "</a><br><br>This link will expire in 15 minutes. \
+               If you did not request this link, no worries, just ignore \
+               this email."
     })
 
     console.log("Message sent: " + info.messageId);

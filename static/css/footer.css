@@ -1,0 +1,78 @@
+.centered-parent
+{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 100%;
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+}
+
+.center-card
+{
+    margin: 0 auto;
+    width: 800px;
+    max-width: 90%;
+}
+
+.center-card .mdl-list
+{
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.center-card .mdl-grid
+{
+    margin: 0;
+}
+
+.center-card .mdl-cell
+{
+    margin: 0 auto;
+}
+
+.center-card .mdl-list__item
+{
+    height: 3.5em;
+}
+
+#inspo
+{
+    font-style: italic;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 17px;
+    margin-bottom: 0;
+    line-height: 22px;
+}
+
+.mdl-layout__tab-bar-container 
+{
+    height: 64px;
+}
+
+.mdl-layout__tab-bar
+{
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 56px;
+}
+
+.mdl-layout__tab-bar .mdl-layout__tab 
+{
+    height: 64px;
+    line-height: 64px;
+}
+
+.mdl-layout__tab-bar-button
+{
+    display: none;
+}
+
+.mdl-layout__tab-panel 
+{
+    padding: 48px 8px;
+}
