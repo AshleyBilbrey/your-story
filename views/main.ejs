@@ -1,24 +1,26 @@
 <%- include("../partials/top.ejs") %>
 <%- include("../partials/nav.ejs") %>
 
-<div class="row">
-    <div class="column" style="background-color:#aaa;">
-        <h2>Explore</h2>
-        <p>Read our stories</p>
+<div class="wrapper">
+        
+<section class="columns">
+    
+    <div class="column">
+        <h2>Post</h2>
+        <p>Share your stories.</p>
     </div>
     
-    <div class="column" style="background-color:#bbb;">
-        <h2>Post</h2>
-        <p>Share your story</p>
-        <div id="splashbox">
-            <a href="/login"><div class="context-button">Log In/Sign Up</div></a>
-        </div>
+    <div class="column">
+        <h2>Explore</h2>
+        <p>Read our stories.</p>
     </div>
   
-    <div class="column" style="background-color:#ccc;">
+    <div class="column">
         <h2>Remember</h2>
         <p>View saved posts</p>
     </div>
+    
+</section> 
 </div>
 
 <%- include("../partials/bottom.ejs") %>
