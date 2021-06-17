@@ -6,6 +6,12 @@ app.set("view engine", "ejs");
 app.use(express.static("static"));
 
 const nodemailer = require("nodemailer");
+var mongo = require('mongodb'); 
+var session = require('express-session');
+var crypto = require("crypto");
+
+var MongoClient = require('mongodb').MongoClient;
+var mongourl = "mongodb://localhost:27017/your-story";
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json())
@@ -26,10 +32,7 @@ app.post('/login', body('email').isEmail(), (req, res) => {
         return res.render("loginfail.ejs")
     }
     console.log(req.body);
-    mailLink("abc123", req.body.email).catch((err) => {
-        res.render("generror.ejs");
-        console.log(err);
-    });
+    newLogin(req.body.email);
     res.render("sentmail.ejs", {
         email: req.body.email
     });
@@ -38,6 +41,38 @@ app.post('/login', body('email').isEmail(), (req, res) => {
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
 })
+
+function newLogin(email) {
+    MongoClient.connect(mongourl, (err, db) => {
+        if(err) throw err;
+        var dbo = db.db("your-story");
+        dbo.collection("users").findOne({email: email.toLowerCase()}, (err, result) => {
+            if (err) throw err
+            let expiry = new Date;
+            let expirytime = expiry.getTime() + (1000 * 60 * 15); // 15 Minutes
+            let string = crypto.randomBytes(64).toString('hex').slice(0, 64);
+            console.log("User pulled from DB");
+            console.log(result);
+            if (result) {
+                dbo.collection("users").updateOne({email: email.toLowerCase()}, {
+                    $set: {
+                        linkexpiry: expirytime,
+                        loginlink: string
+                    }
+                })
+            } else {
+                // Onboard new user
+                let toInsert = {
+                    email: email.toLowerCase(),
+                    linkexpiry: expirytime,
+                    loginlink: string
+                }
+                dbo.collection("users").insertOne(toInsert);
+            }
+            mailLink(string, email);
+        })
+    })
+}
 
 async function mailLink(token, email) {
     let testAccount = await nodemailer.createTestAccount();
