@@ -10,8 +10,8 @@ var mongo = require('mongodb');
 var session = require('express-session');
 var crypto = require("crypto");
 
-let flagfiles = ["agender", "aromantic", "asexual", "bisexual", "genderfluid", "genderqueer", "intersex", "lesbian", "lgbt", "non-binary", "pansexual", "polysexual", "progressive-pride", "transgender"];
-let flagnames = ["Agender", "Aromantic", "Asexual", "Bisexual", "Genderfluid", "Genderqueer", "Intersex", "Lesbian", "LGBTQ+", "Non-binary", "Pansexual", "Polysexual", "Progressive Pride", "Transgender"];
+let flagfiles = ["blank", "agender", "aromantic", "asexual", "bisexual", "genderfluid", "genderqueer", "intersex", "lesbian", "lgbt", "non-binary", "pansexual", "polysexual", "progressive-pride", "transgender"];
+let flagnames = ["Blank", "Agender", "Aromantic", "Asexual", "Bisexual", "Genderfluid", "Genderqueer", "Intersex", "Lesbian", "LGBTQ+", "Non-binary", "Pansexual", "Polysexual", "Progressive Pride", "Transgender"];
 
 app.use(session({
     secret: 'Implement dotenv',
@@ -97,33 +97,45 @@ app.get("/logout", (req, res) => {
 })
 
 app.get("/post", requiresLogin, (req, res, next) => {
-    res.render("post.ejs");
+    res.render("post.ejs", {
+        flagfiles: flagfiles,
+        flagnames: flagnames
+    });
 })
 
 app.post("/post", requiresLogin, (req, res, next) => {
-    if(req.body.title && req.body.content) {
+    if(req.body.title && req.body.content && req.body.flag) {
         if(req.body.title.length > 0 && req.body.content.length > 0) {
-            MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
-                if(err) throw err;
-                var dbo = db.db("your-story");
-                dbo.collection("posts").find().sort({ postnum: -1 }).limit(1).toArray((err, result) => {
-                    let newpostnum;
-                    console.log(result[0]);
-                    if(result[0]) {
-                        newpostnum = result[0].postnum + 1;
-                    } else {
-                        newpostnum = 1;
-                    }
-                    dbo.collection("posts").insertOne({
-                        title: req.body.title,
-                        content: req.body.content,
-                        postnum: newpostnum,
-                        poster: req.session.userid
-                    }).then(() => {
-                        res.redirect("/post/" + newpostnum)
-                    })
-                });
-            })
+            let validImage = false;
+            for(let i = 0; i < flagfiles.length; i++) {
+                if(req.body.flag == flagfiles[i]) {
+                    validImage = true;
+                }
+            }
+            if(validImage) {
+                MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
+                    if(err) throw err;
+                    var dbo = db.db("your-story");
+                    dbo.collection("posts").find().sort({ postnum: -1 }).limit(1).toArray((err, result) => {
+                        let newpostnum;
+                        console.log(result[0]);
+                        if(result[0]) {
+                            newpostnum = result[0].postnum + 1;
+                        } else {
+                            newpostnum = 1;
+                        }
+                        dbo.collection("posts").insertOne({
+                            title: req.body.title,
+                            content: req.body.content,
+                            postnum: newpostnum,
+                            poster: req.session.userid,
+                            flag: req.body.flag
+                        }).then(() => {
+                            res.redirect("/post/" + newpostnum)
+                        })
+                    });
+                })
+            }
         } else {
             res.render("generror.ejs");
         }
@@ -143,7 +155,8 @@ app.get("/post/:postnum", requiresLogin, (req, res, next) => {
             if(result) {
                 res.render("textpost.ejs", {
                     title: result.title,
-                    content: result.content
+                    content: result.content,
+                    flag: result.flag
                 })
             } else {
                 res.render("generror.ejs")

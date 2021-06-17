@@ -52,4 +52,6 @@ input {
 #textpost {
     width: 70%;
     text-align: center;
+    color: gray;
+    mix-blend-mode: difference;
 }

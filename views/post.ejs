@@ -5,9 +5,15 @@
     <div id="postbox">
         <form action="/post" method="post">
             <label for="title">Title:</label><br>
-            <input id="title" name="title" type="text"><br><br>
+            <input id="title" name="title" type="text" required><br><br>
             <label for="content">Content:</label><br>
-            <input id="content" name="content" type="text"><br>
+            <input id="content" name="content" type="text" required><br><br>
+            <label for="flag">Background Flag:</label><br>
+            <select id="flag" name="flag">
+                <% for (var i = 0; i < flagfiles.length; i++) { %>
+                    <option value="<%= flagfiles[i] %>"><%= flagnames[i] %></option>
+                <% } %>
+            </select>
             <br>
             <input type="submit" value="Submit">
         </form>

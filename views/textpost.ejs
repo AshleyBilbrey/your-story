@@ -7,4 +7,14 @@
     </div>
 </div>
 
+<% if(flag != "blank") { %>
+<style>
+    body {
+        background-image: url("/images/<%= flag %>.png");
+        background-position: center;
+        background-size: cover;
+    }
+</style>
+<% } %>
+
 <%- include("../partials/bottom.ejs") %>
