@@ -1,43 +1,25 @@
-* { 
-    vertical-align: baseline;
-    border: 0 none;
-    outline: 0;
-    padding: 0;
-    margin: 0;
+* {
+  box-sizing: border-box;
 }
 
-.grid-container {
-    justify-content: space-around;
-    max-width: 97.6%;
-    display: grid;
-    grid-gap: 50px;
-    grid-template-columns: auto auto auto;
-    background-color: #2196F3;
-    padding: 10px;
-    overflow-x: hidden;
-    background-color: #333;
+/* Create three equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 33.33%;
+  height: 400px;
+  padding: 10px;
 }
 
-.grid-item {
-    border-radius: 5%;
-    background-color: aqua;
-    margin: auto;
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.8);
-    padding: 20px;
-    font-size: 30px;
-    text-align: center;
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: flex;  
+  clear: both;
 }
 
-
-.grid-item-final {
-    padding-right: 4px;
-    border-radius: 5%;
-    background-color: aqua;
-    margin: auto;
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.8);
-    padding: 20px;
-    font-size: 30px;
-    text-align: center;
+/* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 600px) {
+  .column {
+    width: 100%;
+  }
 }
