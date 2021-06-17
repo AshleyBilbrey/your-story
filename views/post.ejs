@@ -1,0 +1,17 @@
+<%- include("../partials/top.ejs") %>
+
+<div class="centerbox">
+    <h1>Post New Story</h1>
+    <div id="postbox">
+        <form action="/post" method="post">
+            <label for="title">Title:</label><br>
+            <input id="title" name="title" type="text"><br><br>
+            <label for="content">Content:</label><br>
+            <input id="content" name="content" type="text"><br>
+            <br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</div>
+
+<%- include("../partials/bottom.ejs") %>

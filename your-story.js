@@ -31,7 +31,7 @@ const { body, validationResult } = require('express-validator');
 
 app.get('/', (req, res) => {
     console.log(req.sessionID);
-    console.log(req.session.email);
+    console.log(req.session.userid);
     res.render("splash.ejs");
 })
 
@@ -63,9 +63,10 @@ app.get('/session', (req, res) => {
                 if(result) {
                     let d = new Date;
                     if(result.linkexpiry > d.getTime()) {
+                        req.session.userid = result._id;
                         req.session.email = result.email;
                         console.log(req.sessionID);
-                        console.log(req.session.email);
+                        console.log(req.session.userid);
                         res.redirect("/story");
                     } else {
                         res.render("sessionissue.ejs")
@@ -88,7 +89,39 @@ app.get('/story', requiresLogin, (req, res, next) => {
 
 app.get("/logout", (req, res) => {
     req.session.email = null;
+    req.session.userid = null;
     res.redirect("/");
+})
+
+app.get("/post", requiresLogin, (req, res, next) => {
+    res.render("post.ejs");
+})
+
+app.post("/post", requiresLogin, (req, res, next) => {
+    if(req.body.title && req.body.content) {
+        MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
+            if(err) throw err;
+            var dbo = db.db("your-story");
+            let result = dbo.collection("posts").find().sort({ postnum: -1 }).limit(1).toArray((err, result) => {
+                let newpostnum;
+                console.log(result[0]);
+                if(result[0]) {
+                    newpostnum = result[0].postnum + 1;
+                } else {
+                    newpostnum = 1;
+                }
+                dbo.collection("posts").insertOne({
+                    title: req.body.title,
+                    content: req.body.content,
+                    postnum: newpostnum,
+                    poster: req.session.userid
+                })
+                res.redirect("/post/" + newpostnum)
+            });
+        })
+    } else {
+        res.render("generror.ejs");
+    }
 })
 
 app.listen(port, () => {
@@ -96,7 +129,7 @@ app.listen(port, () => {
 })
 
 function requiresLogin(req, res, next) {
-    if(!req.session.email) {
+    if(!req.session.userid) {
         res.redirect("/login");
     } else {
         next()
