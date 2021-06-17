@@ -1,25 +1,63 @@
-* {
-  box-sizing: border-box;
+@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+* { box-sizing: border-box; }
+
+body { 
+  font-family: 'Open Sans', sans-serif;
+  color: #666;
 }
 
-/* Create three equal columns that floats next to each other */
+/* STRUCTURE */
+
+.wrapper {
+  padding: 5px;
+  max-width: 100%;
+  width: 95%;
+  margin: 20px auto;
+}
+header {
+  padding: 0 15px;
+}
+
+.columns {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  margin: 5px 0;
+}
+
 .column {
-  float: left;
-  width: 33.33%;
-  height: 400px;
+  flex: 1;
+  border: 1px solid gray;
+  margin: 2px;
   padding: 10px;
+  &:first-child { margin-left: 0; }
+  &:last-child { margin-right: 0; }
+  
 }
 
-/* Clear floats after the columns */
-.row:after {
-  content: "";
-  display: flex;  
-  clear: both;
+footer {
+  padding: 0 15px;
 }
 
-/* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
-@media screen and (max-width: 600px) {
-  .column {
-    width: 100%;
+
+@media screen and (max-width: 980px) {
+  .columns .column {
+    margin-bottom: 5px;
+    flex-basis: 40%;
+    &:nth-last-child(2) {
+      margin-right: 0;
+    }
+    &:last-child {
+      flex-basis: 100%;
+      margin: 0;
+    }
+  }
+}
+
+@media screen and (max-width: 680px) {
+  .columns .column {
+    flex-basis: 100%;
+    margin: 0 0 5px 0;
   }
 }
