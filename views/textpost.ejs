@@ -1,10 +1,15 @@
 <%- include("../partials/top.ejs") %>
 
-<div class="centerbox">
+<div class="centerbox2">
+    <div id="left">
+        <a id="profilelink" href="/profile/<%= profileid %>"><div class="storyhover" id="profile"><h1>🐸</h1></div></a>
+        <a id="heartlink" href="/heart/<%= postid %>/back"><div class="storyhover" id="heart"><h1><%= heartmoji %></h1></div></a>
+    </div>
     <div id="textpost">
         <h1><%= title %></h1>
         <p><%= content %></p>
     </div>
+    <a id="storyright" href="/story"><div class="storyhover" id="right"><h1>➡️</h1></div></a>
 </div>
 
 <% if(flag != "blank") { %>

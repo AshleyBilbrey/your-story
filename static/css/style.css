@@ -63,8 +63,12 @@ select {
 #textpost {
     width: 70%;
     text-align: center;
-    color: gray;
-    mix-blend-mode: difference;
+    color: black;
+    text-shadow:
+        0.07em 0 white,
+        0 0.07em white,
+        -0.07em 0 white,
+        0 -0.07em white;
     font-family: 'Montserrat', sans-serif;
 }
 
