@@ -278,7 +278,7 @@ app.get("/post/:postnum", requiresLogin, (req, res, next) => {
                     content: result.content,
                     flag: result.flag,
                     heartmoji: "❤️",
-                    profileid: req.session.userid,
+                    profileid: result.poster,
                     postid: result.postnum
                 }
                 console.log(result.postnum);
@@ -297,6 +297,40 @@ app.get("/post/:postnum", requiresLogin, (req, res, next) => {
             } else {
                 res.render("generror.ejs")
             }
+        })
+    })
+})
+
+app.get("/profile/:id", requiresLogin, (req, res, next) => {
+    MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
+        if(err) throw err;
+        dbo = db.db("your-story");
+        toRender = {
+            userposts: [],
+            userhearts: []
+        }
+        console.log(req.params.id);
+        dbo.collection("posts").find({ poster: req.params.id }, (err, result) => {
+            if(err) throw err;
+            result.toArray((err, result) => {
+                toRender.userposts = result;
+            });
+            dbo.collection("hearts").find({ user: req.params.id }).toArray().then((result) => {
+                for(let i = 0; i < result.length; i++) {
+                    dbo.collection("posts").findOne({ postnum: result[i].postnum }, (err, result) => {
+                        if(err) throw err;
+                        if(result) {
+                            console.log("heartpost");
+                            console.log(result.postnum);
+                            toRender.userhearts.push(result);
+                        }
+                    })
+                }
+                
+                setTimeout(() => {
+                    res.render("profile.ejs", toRender);
+                }, 250);
+            })
         })
     })
 })

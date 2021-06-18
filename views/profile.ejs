@@ -1,0 +1,27 @@
+<%- include("../partials/top.ejs") %>
+
+<div class="centerbox2">
+    <div id="left">
+        <a id="newpostlink" href="/post"><div id="newpost" class="storyhover"><h1>➕</h1></div></a>
+    </div>
+    <div id="textpost">
+        <h1>Profile</h1>
+        <div id="innerbox">
+            <div id="innerleft">
+                <h2>📝</h2>
+                <% for(let i = 0; i < userposts.length; i++) { %>
+                    <h5><a href="/post/<%= userposts[i].postnum %>"><%= userposts[i].title %></a></h5>
+                <% } %>
+            </div>
+            <div id="innerright">
+                <h2>💖</h2>
+                <% for(let j = 0; j < userhearts.length; j++) { %>
+                    <h5><a href="/post/<%= userhearts[j].postnum %>"><%= userhearts[j].title %></a></h5>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    <a id="storyright" href="/story"><div class="storyhover" id="right"><h1>✨</h1></div></a>
+</div>
+
+<%- include("../partials/bottom.ejs") %>

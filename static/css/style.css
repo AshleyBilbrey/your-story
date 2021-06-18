@@ -117,6 +117,19 @@ textarea {
     justify-content: center;
 }
 
+#newpostlink {
+    height: 100%;
+    width: 100%;
+}
+
+#newpost {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 #right {
     width: 100%;
     height: 100%;
@@ -142,4 +155,19 @@ textarea {
     flex-direction: row;
     height: 100%;
     width: 100%;
+}
+
+#innerleft {
+    width: 50%;
+}
+
+#innerright {
+    width: 50%;
+}
+
+#innerbox {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: row;
 }
