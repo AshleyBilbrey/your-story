@@ -35,7 +35,12 @@ const { body, validationResult } = require('express-validator');
 app.get('/', (req, res) => {
     console.log(req.sessionID);
     console.log(req.session.userid);
-    res.render("splash.ejs");
+    if(req.session.userid) {
+        res.redirect("/story")
+    } else {
+        res.render("splash.ejs");
+    }
+    
 })
 
 app.get('/login', (req, res) => {
