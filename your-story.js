@@ -90,16 +90,74 @@ app.get('/session', (req, res) => {
 })
 
 app.get('/story', requiresLogin, (req, res, next) => {
-    res.render("story.ejs", {
-        email: req.session.email,
-        title: "Title",
-        content: "text",
-        flag: "progressive-pride",
-        heartmoji: "❤️",
-        profileid: req.session.userid,
-        postid: "123"
-    });
+    MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
+        if(err) throw err;
+        var dbo = db.db("your-story");
+        console.log("userid");
+        console.log(req.session.userid);
+        dbo.collection("users").findOne({ "_id": mongo.ObjectId(req.session.userid) }, (err, result) => {
+            if(err) throw err;
+            if(result) {
+                let findnum = 1;
+                if(result.currentpost) {
+                    findnum = result.currentpost;
+                }
+                dbo.collection("posts").findOne({ postnum: findnum }, (err, result) => {
+                    if(result) {
+                        res.render("story.ejs", {
+                            title: result.title,
+                            content: result.content,
+                            flag: result.flag,
+                            heartmoji: "❤️",
+                            profileid: req.session.userid,
+                            postid: result.postnum
+                        });
+                    } else {
+                        res.redirect("/next")
+                    }
+                })
+            } else {
+                console.log("cannot find user");
+                res.render("generror.ejs")
+            }
+        })
+    })
 })
+
+app.get("/next", requiresLogin, (req, res, next) => {
+    MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
+        if(err) throw err;
+        let dbo = db.db("your-story");
+        dbo.collection("users").findOne({ "_id": mongo.ObjectId(req.session.userid) }, (err, result) => {
+            if(err) throw err;
+            if(result) {
+                if(result.currentpost) {
+                    dbo.collection("posts").find({ postnum: { $gt: result.currentpost } }).sort({ postnum: 1 }).limit(1).toArray((err, result) => {
+                        if(result[0]) {
+                            dbo.collection("users").updateOne({ "_id": mongo.ObjectID(req.session.userid) }, {
+                                $set: {
+                                    currentpost: result[0].postnum
+                                }
+                            }).then(() => {
+                                res.redirect("/story");
+                            })
+                        } else {
+                            dbo.collection("users").updateOne({ "_id": mongo.ObjectID(req.session.userid) }, {
+                                $set: {
+                                    currentpost: 1
+                                }
+                            }).then(() => {
+                                res.redirect("/story");
+                            })
+                        }
+                    })
+                }
+            } else {
+                res.render("generror.ejs")
+            }
+        });
+    });
+});
 
 app.get("/logout", (req, res) => {
     req.session.email = null;
@@ -177,7 +235,7 @@ app.get("/post/:postnum", requiresLogin, (req, res, next) => {
 })
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+    console.log(`Your Story listening at http://localhost:${port}`);
 })
 
 function requiresLogin(req, res, next) {
