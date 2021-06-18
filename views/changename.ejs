@@ -1,0 +1,15 @@
+<%- include("../partials/top.ejs") %>
+
+<div class="centerbox">
+    <h1>Change Display Name</h1>
+    <div id="loginbox">
+        <form action="/changename" method="post">
+            <label for="email">Display Name:</label><br>
+            <input id="displayname" name="displayname" type="text"><br>
+            <br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</div>
+
+<%- include("../partials/bottom.ejs") %>

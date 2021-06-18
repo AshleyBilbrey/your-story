@@ -89,7 +89,7 @@ app.get('/session', (req, res) => {
     }
 })
 
-app.get('/story', requiresLogin, (req, res, next) => {
+app.get('/story', requiresLogin, requiresDisplayName, (req, res, next) => {
     MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
         if(err) throw err;
         var dbo = db.db("your-story");
@@ -106,23 +106,32 @@ app.get('/story', requiresLogin, (req, res, next) => {
                     if(result) {
                         let toPass = {
                             title: result.title,
-                            content: result.content,
+                            content: result.content.replace(/\n/g, '<br>'),
                             flag: result.flag,
                             heartmoji: "❤️",
+                            displayname: "",
+                            posterid: result.poster,
                             profileid: req.session.userid,
                             postid: result.postnum
                         }
+                        console.log(result.content);
                         console.log(result.postnum);
-                        dbo.collection("hearts").findOne({ user: req.session.userid, postnum: parseInt(result.postnum) }, (err, result) => {
-                            console.log(result);
-                            if(result) {
-                                console.log("They love this post <3")
-                                toPass.heartmoji = "💖";
-                                res.render("story.ejs", toPass);
-                            } else {
-                                res.render("story.ejs", toPass);
-                            }
-                            
+                        dbo.collection("users").findOne({ _id: mongo.ObjectID(result.poster) }, (err, result) => {
+                            toPass.displayname = result.displayname;
+        
+                            dbo.collection("hearts").findOne({ user: req.session.userid, postnum: parseInt(toPass.postid) }, (err, result) => {
+                                console.log("Hearts?")
+                                console.log(result);
+                                if(result) {
+                                    console.log("They love this post <3")
+                                    toPass.heartmoji = "💖";
+                                    res.render("story.ejs", toPass);
+                                } else {
+                                    res.render("story.ejs", toPass);
+                                }
+                                
+                            })
+        
                         })
                         
                     } else {
@@ -137,7 +146,7 @@ app.get('/story', requiresLogin, (req, res, next) => {
     })
 })
 
-app.get("/next", requiresLogin, (req, res, next) => {
+app.get("/next", requiresLogin, requiresDisplayName, (req, res, next) => {
     MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
         if(err) throw err;
         let dbo = db.db("your-story");
@@ -164,6 +173,13 @@ app.get("/next", requiresLogin, (req, res, next) => {
                             })
                         }
                     })
+                } else {
+                    dbo.collection("users").updateOne({ _id: mongo.ObjectID(req.session.userid) }, {
+                        $set: {
+                            currentpost: 2
+                        }
+                    })
+                    res.redirect("/story")
                 }
             } else {
                 res.render("generror.ejs")
@@ -172,7 +188,7 @@ app.get("/next", requiresLogin, (req, res, next) => {
     });
 });
 
-app.get("/heart/:postnum", requiresLogin, (req, res, next) => {
+app.get("/heart/:postnum", requiresLogin, requiresDisplayName, (req, res, next) => {
     MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
         if(err) throw err;
         let dbo = db.db("your-story");
@@ -192,7 +208,7 @@ app.get("/heart/:postnum", requiresLogin, (req, res, next) => {
     })
 })
 
-app.get("/heart/:postnum/back", requiresLogin, (req, res, next) => {
+app.get("/heart/:postnum/back", requiresLogin, requiresDisplayName, (req, res, next) => {
     MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
         if(err) throw err;
         let dbo = db.db("your-story");
@@ -218,14 +234,14 @@ app.get("/logout", (req, res) => {
     res.redirect("/");
 })
 
-app.get("/post", requiresLogin, (req, res, next) => {
+app.get("/post", requiresLogin, requiresDisplayName, (req, res, next) => {
     res.render("post.ejs", {
         flagfiles: flagfiles,
         flagnames: flagnames
     });
 })
 
-app.post("/post", requiresLogin, (req, res, next) => {
+app.post("/post", requiresLogin, requiresDisplayName, (req, res, next) => {
     if(req.body.title && req.body.content && req.body.flag) {
         if(req.body.title.length > 0 && req.body.content.length > 0) {
             let validImage = false;
@@ -266,7 +282,7 @@ app.post("/post", requiresLogin, (req, res, next) => {
     }
 })
 
-app.get("/post/:postnum", requiresLogin, (req, res, next) => {
+app.get("/post/:postnum", requiresLogin, requiresDisplayName, (req, res, next) => {
     MongoClient.connect(mongourl, { useUnifiedTopology: true}, (err, db) => {
         if(err) throw err;
         var dbo = db.db("your-story");
@@ -275,24 +291,33 @@ app.get("/post/:postnum", requiresLogin, (req, res, next) => {
             if(result) {
                 let toPass = {
                     title: result.title,
-                    content: result.content,
+                    content: result.content.replace(/\n/g, '<br>'),
                     flag: result.flag,
                     heartmoji: "❤️",
                     profileid: result.poster,
-                    postid: result.postnum
+                    posterid: result.poster,
+                    postid: result.postnum,
+                    displayname: ""
                 }
+                console.log(result.content);
                 console.log(result.postnum);
-                dbo.collection("hearts").findOne({ user: req.session.userid, postnum: parseInt(result.postnum) }, (err, result) => {
-                    console.log(result);
-                    if(result) {
-                        console.log("They love this post <3")
-                        toPass.heartmoji = "💖";
-                        res.render("textpost.ejs", toPass);
-                    } else {
-                        res.render("textpost.ejs", toPass);
-                    }
-                    
+                dbo.collection("users").findOne({ _id: mongo.ObjectID(result.poster) }, (err, result) => {
+                    toPass.displayname = result.displayname;
+
+                    dbo.collection("hearts").findOne({ user: req.session.userid, postnum: parseInt(toPass.postid) }, (err, result) => {
+                        console.log(result);
+                        if(result) {
+                            console.log("They love this post <3")
+                            toPass.heartmoji = "💖";
+                            res.render("textpost.ejs", toPass);
+                        } else {
+                            res.render("textpost.ejs", toPass);
+                        }
+                        
+                    })
+
                 })
+                
                 
             } else {
                 res.render("generror.ejs")
@@ -301,38 +326,66 @@ app.get("/post/:postnum", requiresLogin, (req, res, next) => {
     })
 })
 
-app.get("/profile/:id", requiresLogin, (req, res, next) => {
+app.get("/profile/:id", requiresLogin, requiresDisplayName, (req, res, next) => {
     MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
         if(err) throw err;
         dbo = db.db("your-story");
         toRender = {
             userposts: [],
-            userhearts: []
+            userhearts: [],
+            displayname: ""
         }
-        console.log(req.params.id);
-        dbo.collection("posts").find({ poster: req.params.id }, (err, result) => {
+        dbo.collection("users").findOne({ _id: mongo.ObjectID(req.params.id) }, (err, result) => {
             if(err) throw err;
-            result.toArray((err, result) => {
-                toRender.userposts = result;
-            });
-            dbo.collection("hearts").find({ user: req.params.id }).toArray().then((result) => {
-                for(let i = 0; i < result.length; i++) {
-                    dbo.collection("posts").findOne({ postnum: result[i].postnum }, (err, result) => {
-                        if(err) throw err;
-                        if(result) {
-                            console.log("heartpost");
-                            console.log(result.postnum);
-                            toRender.userhearts.push(result);
-                        }
-                    })
-                }
-                
-                setTimeout(() => {
-                    res.render("profile.ejs", toRender);
-                }, 250);
+            toRender.displayname = result.displayname
+            console.log(result.displayname);
+            dbo.collection("posts").find({ poster: req.params.id }, (err, result) => {
+                if(err) throw err;
+                result.toArray((err, result) => {
+                    toRender.userposts = result;
+                });
+                dbo.collection("hearts").find({ user: req.params.id }).toArray().then((result) => {
+                    for(let i = 0; i < result.length; i++) {
+                        dbo.collection("posts").findOne({ postnum: result[i].postnum }, (err, result) => {
+                            if(err) throw err;
+                            if(result) {
+                                console.log("heartpost");
+                                console.log(result.postnum);
+                                toRender.userhearts.push(result);
+                            }
+                        })
+                    }
+                    
+                    setTimeout(() => {
+                        res.render("profile.ejs", toRender);
+                    }, 250);
+                })
             })
         })
+        console.log(req.params.id);
     })
+})
+
+app.get("/changename", requiresLogin, (req, res, next) => {
+    res.render("changename.ejs");
+})
+
+app.post("/changename", requiresLogin, (req, res, next) => {
+    if(req.body.displayname) {
+        MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
+            if(err) throw err;
+            dbo = db.db("your-story");
+            dbo.collection("users").updateOne({ _id: mongo.ObjectID(req.session.userid) }, {
+                $set: {
+                    displayname: req.body.displayname
+                }
+            }).then(() => {
+                res.redirect("/profile/" + req.session.userid);
+            })
+        })
+    } else {
+        res.render("generror.ejs")
+    }
 })
 
 
@@ -346,6 +399,21 @@ function requiresLogin(req, res, next) {
     } else {
         next()
     }
+}
+
+function requiresDisplayName(req, res, next) {
+    MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
+        if(err) throw err;
+        dbo = db.db("your-story");
+        dbo.collection("users").findOne({ _id: mongo.ObjectID(req.session.userid) }, (err, result) => {
+            if(err) throw err;
+            if(!result.displayname) {
+                res.redirect("/changename")
+            } else {
+                next()
+            }
+        });
+    })
 }
 
 function newLogin(email) {
