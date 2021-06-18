@@ -76,3 +76,7 @@
 {
     padding: 48px 8px;
 }
+
+body {
+    overflow-x: hidden;
+}

@@ -2,26 +2,26 @@
 
 <div class="centerbox2">
     <div id="left">
-        <a id="newpostlink" href="/post"><div id="newpost" class="storyhover"><h1>➕</h1></div></a>
+        <a id="newpostlink" href="/post" title="Make New Post"><div id="newpost" class="storyhover"><h1>➕</h1></div></a>
     </div>
     <div id="textpost">
         <h1><%= displayname %>'s Profile</h1>
         <div id="innerbox">
             <div id="innerleft">
-                <h2>📝</h2>
+                <h2 title="<%= displayname %>'s Posts">📝</h2>
                 <% for(let i = 0; i < userposts.length; i++) { %>
                     <h5><a href="/post/<%= userposts[i].postnum %>"><%= userposts[i].title %></a></h5>
                 <% } %>
             </div>
             <div id="innerright">
-                <h2>💖</h2>
+                <h2 title="<%= displayname %>'s Hearts">💖</h2>
                 <% for(let j = 0; j < userhearts.length; j++) { %>
                     <h5><a href="/post/<%= userhearts[j].postnum %>"><%= userhearts[j].title %></a></h5>
                 <% } %>
             </div>
         </div>
     </div>
-    <a id="storyright" href="/story"><div class="storyhover" id="right"><h1>✨</h1></div></a>
+    <a id="storyright" href="/story" title="View Global Stories"><div class="storyhover" id="right"><h1>✨</h1></div></a>
 </div>
 
 <%- include("../partials/bottom.ejs") %>

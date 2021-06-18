@@ -4,6 +4,7 @@
   "description": "initial commit",
   "main": "your-story.js",
   "dependencies": {
+    "dotenv": "^10.0.0",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
     "express-session": "^1.17.2",

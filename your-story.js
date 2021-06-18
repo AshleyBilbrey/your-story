@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const port = 3001;
 
+const dotenv = require('dotenv').config()
+
 app.set("view engine", "ejs");
 app.use(express.static("static"));
 
@@ -13,8 +15,11 @@ var crypto = require("crypto");
 let flagfiles = ["blank", "agender", "aromantic", "asexual", "bisexual", "genderfluid", "genderqueer", "intersex", "lesbian", "lgbt", "non-binary", "pansexual", "polysexual", "progressive-pride", "transgender"];
 let flagnames = ["Blank", "Agender", "Aromantic", "Asexual", "Bisexual", "Genderfluid", "Genderqueer", "Intersex", "Lesbian", "LGBTQ+", "Non-binary", "Pansexual", "Polysexual", "Progressive Pride", "Transgender"];
 
+console.log(process.env.SESSION_SECRET);
+console.log(process.env.MAIL_HOST);
+
 app.use(session({
-    secret: 'Implement dotenv',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     credentials: 'include',
@@ -241,7 +246,7 @@ app.get("/post", requiresLogin, requiresDisplayName, (req, res, next) => {
     });
 })
 
-app.post("/post", requiresLogin, requiresDisplayName, (req, res, next) => {
+app.post("/post", requiresLogin, requiresDisplayName, body("title").escape(), body("content").escape(), (req, res, next) => {
     if(req.body.title && req.body.content && req.body.flag) {
         if(req.body.title.length > 0 && req.body.content.length > 0) {
             let validImage = false;
@@ -370,7 +375,7 @@ app.get("/changename", requiresLogin, (req, res, next) => {
     res.render("changename.ejs");
 })
 
-app.post("/changename", requiresLogin, (req, res, next) => {
+app.post("/changename", requiresLogin, body("displayname").escape(), (req, res, next) => {
     if(req.body.displayname) {
         MongoClient.connect(mongourl, { useUnifiedTopology: true }, (err, db) => {
             if(err) throw err;
@@ -451,16 +456,24 @@ function newLogin(email) {
 }
 
 async function mailLink(token, email) {
+    let host = process.env.MAIL_HOST;
+    let auth = {
+        user: process.env.MAIL_AUTH_USER,
+        pass: process.env.MAIL_AUTH_PASS
+    }
+
     let testAccount = await nodemailer.createTestAccount();
 
+    if(process.env.MAIL_DEMO) {
+        auth.user = testAccount.user
+        auth.pass = testAccount.pass
+    }
+
     let transporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
+        host: host,
         port: 587,
         secure: false,
-        auth: {
-            user: testAccount.user,
-            pass: testAccount.pass
-        }
+        auth: auth
     })
 
     let info = await transporter.sendMail({
@@ -477,6 +490,8 @@ async function mailLink(token, email) {
 
     console.log("Message sent: " + info.messageId);
 
-    console.log("URL to see test email: " + nodemailer.getTestMessageUrl(info));
+    if(process.env.MAIL_DEMO) {
+        console.log("URL to see test email: " + nodemailer.getTestMessageUrl(info));
+    }
 
 }
