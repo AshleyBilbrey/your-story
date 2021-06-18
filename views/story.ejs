@@ -1,9 +1,25 @@
 <%- include("../partials/top.ejs") %>
 
-<div class="centerbox">
-    <h1>Story</h1>
-    <h2>This is a placeholder page. You should only be able to see it if you are logged in.</h2>
-    <h2>Your email in the system is <%= email %></h2>
+<div class="centerbox2">
+    <div id="left">
+        <a id="profilelink" href="/profile/<%= profileid %>"><div class="storyhover" id="profile"><h1>🐸</h1></div></a>
+        <a id="heartlink" href="/heart/<%= postid %>"><div class="storyhover" id="heart"><h1><%= heartmoji %></h1></div></a>
+    </div>
+    <div id="textpost">
+        <h1><%= title %></h1>
+        <p><%= content %></p>
+    </div>
+    <a id="storyright" href="/next"><div class="storyhover" id="right"><h1>➡️</h1></div></a>
 </div>
+
+<% if(flag != "blank") { %>
+<style>
+    body {
+        background-image: url("/images/<%= flag %>.png");
+        background-position: center;
+        background-size: cover;
+    }
+</style>
+<% } %>
 
 <%- include("../partials/bottom.ejs") %>

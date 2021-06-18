@@ -91,7 +91,13 @@ app.get('/session', (req, res) => {
 
 app.get('/story', requiresLogin, (req, res, next) => {
     res.render("story.ejs", {
-        email: req.session.email
+        email: req.session.email,
+        title: "Title",
+        content: "text",
+        flag: "progressive-pride",
+        heartmoji: "❤️",
+        profileid: req.session.userid,
+        postid: "123"
     });
 })
 
